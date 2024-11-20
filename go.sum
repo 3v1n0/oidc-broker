@@ -1,3 +1,5 @@
+github.com/3v1n0/authd v0.0.0-20241120222544-24ae66feb560 h1:4wAE7+APIGt0kSPr3kFSM0HlC32Kz8+oIHFBVKqbp7o=
+github.com/3v1n0/authd v0.0.0-20241120222544-24ae66feb560/go.mod h1:yqIsfOCwH4QrZyv8LaZeacKjOkFLGtlZu4zJ/xpVq2w=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0 h1:nyQWyZvwGTvunIMxi1Y9uXkcyr+I7TeNrr/foo4Kpk8=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0/go.mod h1:l38EPgmsp71HHLq9j7De57JcKOWPyhrsW1Awm1JS6K0=
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 h1:ywEEhmNahHBihViHepv3xPBn1663uRv2t2q/ESv9seY=

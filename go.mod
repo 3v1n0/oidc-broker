@@ -72,3 +72,5 @@ require (
 	google.golang.org/grpc v1.67.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
+
+replace github.com/ubuntu/authd v0.3.6 => github.com/3v1n0/authd v0.0.0-20241120222544-24ae66feb560
