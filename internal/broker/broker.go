@@ -219,7 +219,7 @@ func (b *Broker) connectToOIDCServer(ctx context.Context) (*oidc.Provider, error
 }
 
 // GetAuthenticationModes returns the authentication modes available for the user.
-func (b *Broker) GetAuthenticationModes(sessionID string, supportedUILayouts []map[string]string) (authModes []map[string]string, err error) {
+func (b *Broker) GetAuthenticationModes(sessionID string, supportedUILayouts []map[string]string) ([]map[string]string, error) {
 	session, err := b.getSession(sessionID)
 	if err != nil {
 		return nil, err
@@ -272,11 +272,9 @@ func (b *Broker) GetAuthenticationModes(sessionID string, supportedUILayouts []m
 		return nil, err
 	}
 
+	var authModes []*auth.Mode
 	for _, id := range availableModes {
-		authModes = append(authModes, map[string]string{
-			layouts.ID:    id,
-			layouts.Label: supportedAuthModes[id],
-		})
+		authModes = append(authModes, auth.NewMode(id, supportedAuthModes[id]))
 	}
 
 	if len(authModes) == 0 {
@@ -288,7 +286,7 @@ func (b *Broker) GetAuthenticationModes(sessionID string, supportedUILayouts []m
 		return nil, err
 	}
 
-	return authModes, nil
+	return auth.NewModeMaps(authModes)
 }
 
 func (b *Broker) supportedAuthModesFromLayout(supportedUILayouts []*layouts.UILayout) (supportedModes map[string]string) {
