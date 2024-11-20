@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/ubuntu/authd-oidc-brokers/internal/broker/authmodes"
@@ -46,6 +47,10 @@ func (p NoProvider) CurrentAuthenticationModesOffered(
 	endpoints map[string]struct{},
 	currentAuthStep int,
 ) ([]string, error) {
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug(fmt.Sprintf("In CurrentAuthenticationModesOffered: sessionMode=%q, supportedAuthModes=%q, tokenExists=%t, providerReachable=%t, endpoints=%q, currentAuthStep=%d\n",
+			sessionMode, supportedAuthModes, tokenExists, providerReachable, endpoints, currentAuthStep))
+	}
 	var offeredModes []string
 	switch sessionMode {
 	case auth.SessionModePasswd:
@@ -69,6 +74,9 @@ func (p NoProvider) CurrentAuthenticationModesOffered(
 		if currentAuthStep > 0 {
 			offeredModes = []string{authmodes.NewPassword}
 		}
+	}
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug(fmt.Sprintf("Offered modes: %q", offeredModes))
 	}
 
 	for _, mode := range offeredModes {
