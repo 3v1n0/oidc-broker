@@ -405,7 +405,7 @@ func (b *Broker) generateUILayout(session *session, authModeID string) (map[stri
 
 	case authmodes.NewPassword:
 		label := "Create a local password"
-		if session.mode == "passwd" {
+		if session.mode == auth.SessionModePasswd {
 			label = "Update your local password"
 		}
 
@@ -595,7 +595,7 @@ func (b *Broker) handleIsAuthenticated(ctx context.Context, session *session, au
 			authInfo.UserInfo = userInfo
 		}
 
-		if session.mode == "passwd" {
+		if session.mode == auth.SessionModePasswd {
 			session.authInfo["auth_info"] = authInfo
 			return AuthNext, nil
 		}

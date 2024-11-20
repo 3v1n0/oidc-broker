@@ -16,6 +16,7 @@ import (
 	"github.com/ubuntu/authd-oidc-brokers/internal/providers/info"
 	"github.com/ubuntu/authd-oidc-brokers/internal/testutils"
 	"github.com/ubuntu/authd-oidc-brokers/internal/token"
+	"github.com/ubuntu/authd/brokers/auth"
 	"github.com/ubuntu/authd/brokers/layouts"
 	"github.com/ubuntu/authd/brokers/layouts/entries"
 	"gopkg.in/yaml.v3"
@@ -107,7 +108,7 @@ func TestNewSession(t *testing.T) {
 				customHandlers: tc.customHandlers,
 			})
 
-			id, _, err := b.NewSession("test-user", "lang", "auth")
+			id, _, err := b.NewSession("test-user", "lang", auth.SessionModeAuth)
 			require.NoError(t, err, "NewSession should not have returned an error")
 
 			gotOffline, err := b.IsOffline(id)
@@ -178,8 +179,8 @@ func TestGetAuthenticationModes(t *testing.T) {
 		"Get_only_password_if_token_exists_and_provider_does_not_support_device_auth_qr": {tokenExists: true, providerAddress: "127.0.0.1:31311", deviceAuthUnsupported: true},
 
 		// Passwd Session
-		"Get_only_password_if_token_exists_and_session_is_passwd":                      {sessionMode: "passwd", tokenExists: true},
-		"Get_newpassword_if_already_authenticated_with_password_and_session_is_passwd": {sessionMode: "passwd", tokenExists: true, secondAuthStep: true},
+		"Get_only_password_if_token_exists_and_session_is_passwd":                      {sessionMode: auth.SessionModePasswd, tokenExists: true},
+		"Get_newpassword_if_already_authenticated_with_password_and_session_is_passwd": {sessionMode: auth.SessionModePasswd, tokenExists: true, secondAuthStep: true},
 
 		"Error_if_there_is_no_session": {sessionID: "-", wantErr: true},
 
@@ -191,14 +192,14 @@ func TestGetAuthenticationModes(t *testing.T) {
 		"Error_if_expecting_password_but_not_supported":       {supportedLayouts: []string{"form-without-entry"}, wantErr: true},
 
 		// Passwd session errors
-		"Error_if_session_is_passwd_but_token_does_not_exist": {sessionMode: "passwd", wantErr: true},
+		"Error_if_session_is_passwd_but_token_does_not_exist": {sessionMode: auth.SessionModePasswd, wantErr: true},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
 			if tc.sessionMode == "" {
-				tc.sessionMode = "auth"
+				tc.sessionMode = auth.SessionModeAuth
 			}
 
 			cfg := &brokerForTestConfig{}
@@ -330,9 +331,9 @@ func TestSelectAuthenticationMode(t *testing.T) {
 			}
 			b := newBrokerForTests(t, cfg)
 
-			sessionType := "auth"
+			sessionType := auth.SessionModeAuth
 			if tc.passwdSession {
-				sessionType = "passwd"
+				sessionType = auth.SessionModePasswd
 			}
 			sessionID, _ := newSessionForTests(t, b, "", sessionType)
 
@@ -521,7 +522,7 @@ func TestIsAuthenticated(t *testing.T) {
 			t.Parallel()
 
 			if tc.sessionMode == "" {
-				tc.sessionMode = "auth"
+				tc.sessionMode = auth.SessionModeAuth
 			}
 
 			if tc.sessionOffline {
@@ -883,7 +884,7 @@ func TestFetchUserInfo(t *testing.T) {
 			}
 			tc.token.issuer = defaultIssuerURL
 
-			sessionID, _, err := b.NewSession(tc.username, "lang", "auth")
+			sessionID, _, err := b.NewSession(tc.username, "lang", auth.SessionModeAuth)
 			require.NoError(t, err, "Setup: Failed to create session for the tests")
 
 			cachedInfo := generateCachedInfo(t, tc.token)

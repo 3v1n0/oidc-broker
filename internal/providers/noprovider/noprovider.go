@@ -9,6 +9,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/ubuntu/authd-oidc-brokers/internal/broker/authmodes"
 	"github.com/ubuntu/authd-oidc-brokers/internal/providers/info"
+	"github.com/ubuntu/authd/brokers/auth"
 	"golang.org/x/oauth2"
 )
 
@@ -47,7 +48,7 @@ func (p NoProvider) CurrentAuthenticationModesOffered(
 ) ([]string, error) {
 	var offeredModes []string
 	switch sessionMode {
-	case "passwd":
+	case auth.SessionModePasswd:
 		if !tokenExists {
 			return nil, errors.New("user has no cached token")
 		}
