@@ -322,14 +322,14 @@ func (b *Broker) supportedAuthModesFromLayout(supportedUILayouts []map[string]st
 }
 
 // SelectAuthenticationMode selects the authentication mode for the user.
-func (b *Broker) SelectAuthenticationMode(sessionID, authModeID string) (uiLayoutInfo map[string]string, err error) {
+func (b *Broker) SelectAuthenticationMode(sessionID, authModeID string) (map[string]string, error) {
 	session, err := b.getSession(sessionID)
 	if err != nil {
 		return nil, err
 	}
 
 	// populate UI options based on selected authentication mode
-	uiLayoutInfo, err = b.generateUILayout(&session, authModeID)
+	uiLayout, err := b.generateUILayout(&session, authModeID)
 	if err != nil {
 		return nil, err
 	}
@@ -345,15 +345,14 @@ func (b *Broker) SelectAuthenticationMode(sessionID, authModeID string) (uiLayou
 		return nil, err
 	}
 
-	return uiLayoutInfo, nil
+	return uiLayout.ToMap()
 }
 
-func (b *Broker) generateUILayout(session *session, authModeID string) (map[string]string, error) {
+func (b *Broker) generateUILayout(session *session, authModeID string) (*layouts.UILayout, error) {
 	if !slices.Contains(session.authModes, authModeID) {
 		return nil, fmt.Errorf("selected authentication mode %q does not exist", authModeID)
 	}
 
-	var uiLayout map[string]string
 	switch authModeID {
 	case authmodes.Device, authmodes.DeviceQr:
 		ctx, cancel := context.WithTimeout(context.Background(), maxRequestDuration)
@@ -388,21 +387,21 @@ func (b *Broker) generateUILayout(session *session, authModeID string) (map[stri
 			)
 		}
 
-		uiLayout = map[string]string{
-			layouts.Type:    layouts.QrCode,
-			layouts.Label:   label,
-			layouts.Wait:    layouts.True,
-			layouts.Button:  "Request new login code",
-			layouts.Content: response.VerificationURI,
-			layouts.Code:    response.UserCode,
-		}
+		return layouts.NewUI(
+			layouts.UIQrCode,
+			layouts.WithLabel(label),
+			layouts.WithWaitBool(true),
+			layouts.WithButton("Request new login code"),
+			layouts.WithContent(response.VerificationURI),
+			layouts.WithCode(response.UserCode),
+		), nil
 
 	case authmodes.Password:
-		uiLayout = map[string]string{
-			layouts.Type:  layouts.Form,
-			layouts.Label: "Enter your local password",
-			layouts.Entry: entries.CharsPassword,
-		}
+		return layouts.NewUI(
+			layouts.UIForm,
+			layouts.WithLabel("Enter your local password"),
+			layouts.WithEntry(entries.CharsPassword),
+		), nil
 
 	case authmodes.NewPassword:
 		label := "Create a local password"
@@ -410,14 +409,14 @@ func (b *Broker) generateUILayout(session *session, authModeID string) (map[stri
 			label = "Update your local password"
 		}
 
-		uiLayout = map[string]string{
-			layouts.Type:  layouts.NewPassword,
-			layouts.Label: label,
-			layouts.Entry: entries.CharsPassword,
-		}
+		return layouts.NewUI(
+			layouts.UINewPassword,
+			layouts.WithLabel(label),
+			layouts.WithEntry(entries.CharsPassword),
+		), nil
 	}
 
-	return uiLayout, nil
+	return nil, nil
 }
 
 // IsAuthenticated evaluates the provided authenticationData and returns the authentication status for the user.
