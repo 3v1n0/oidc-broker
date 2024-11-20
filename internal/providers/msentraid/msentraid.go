@@ -217,7 +217,9 @@ func getAllUserGroups(client *msgraphsdk.GraphServiceClient) ([]msgraphmodels.Gr
 			groupNames = append(groupNames, *groupNamePtr)
 		}
 	}
-	slog.Debug(fmt.Sprintf("Got groups: %s", strings.Join(groupNames, ", ")))
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug(fmt.Sprintf("Got groups: %s", strings.Join(groupNames, ", ")))
+	}
 
 	return groups, nil
 }
@@ -233,7 +235,10 @@ func (p Provider) CurrentAuthenticationModesOffered(
 	endpoints map[string]struct{},
 	currentAuthStep int,
 ) ([]string, error) {
-	slog.Debug(fmt.Sprintf("In CurrentAuthenticationModesOffered: sessionMode=%q, supportedAuthModes=%q, tokenExists=%t, providerReachable=%t, endpoints=%q, currentAuthStep=%d\n", sessionMode, supportedAuthModes, tokenExists, providerReachable, endpoints, currentAuthStep))
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug(fmt.Sprintf("In CurrentAuthenticationModesOffered: sessionMode=%q, supportedAuthModes=%q, tokenExists=%t, providerReachable=%t, endpoints=%q, currentAuthStep=%d\n",
+			sessionMode, supportedAuthModes, tokenExists, providerReachable, endpoints, currentAuthStep))
+	}
 	var offeredModes []string
 	switch sessionMode {
 	case "passwd":
@@ -258,7 +263,9 @@ func (p Provider) CurrentAuthenticationModesOffered(
 			offeredModes = []string{authmodes.NewPassword}
 		}
 	}
-	slog.Debug(fmt.Sprintf("Offered modes: %q", offeredModes))
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug(fmt.Sprintf("Offered modes: %q", offeredModes))
+	}
 
 	for _, mode := range offeredModes {
 		if _, ok := supportedAuthModes[mode]; !ok {
